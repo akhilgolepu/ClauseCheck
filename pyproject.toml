@@ -1,0 +1,23 @@
+[project]
+name = "clausecheck"
+version = "0.1.0"
+description = "Grounded Q&A and SOP gap-checking for regulated quality documents"
+requires-python = ">=3.11,<3.13"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["Docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.11"
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["^Docs/", "^\\.venv/"]

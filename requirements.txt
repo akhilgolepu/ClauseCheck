@@ -1,0 +1,73 @@
+# ClauseCheck - Python dependencies
+# Python 3.11 or 3.12
+#
+# IMPORTANT: install PyTorch FIRST, separately, with CUDA 12.8+ support
+# (required for the RTX 5060 / Blackwell). Do not rely on the default PyPI wheel:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+# For CPU-only deployment (Docker demo image):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#
+# Then: pip install -r requirements.txt
+#
+# Lower bounds below are a starting point. After your first successful
+# install, run `pip freeze > requirements.lock.txt` and commit the lock file
+# so evaluation runs are reproducible (pinned versions).
+
+# --- API / serving ---
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pydantic-settings>=2.3
+python-multipart>=0.0.9
+slowapi>=0.1.9            # rate limiting for the public demo
+httpx>=0.27
+
+# --- Database ---
+psycopg[binary,pool]>=3.2
+SQLAlchemy>=2.0
+pgvector>=0.3
+alembic>=1.13
+
+# --- Retrieval / ML ---
+sentence-transformers>=3.0   # embeddings + cross-encoder reranker
+transformers>=4.44
+huggingface_hub>=0.24
+numpy>=1.26
+bm25s>=0.2                   # BM25 baseline for experiments
+scikit-learn>=1.5            # precision/recall, Cohen's kappa
+
+# --- Document parsing ---
+pymupdf>=1.24                # PDF text extraction
+pdfplumber>=0.11             # fallback / tables
+lxml>=5.2                    # eCFR XML
+beautifulsoup4>=4.12
+python-docx>=1.1             # write and read synthetic SOPs
+markdown-it-py>=3.0
+
+# --- LLM clients (install the provider(s) you use) ---
+anthropic>=0.40
+openai>=1.40                 # optional; also works for Ollama's OpenAI-compatible API
+tiktoken>=0.7                # token counting
+tenacity>=8.5                # API retries with backoff
+
+# --- Evaluation / analysis ---
+pandas>=2.2
+matplotlib>=3.9
+tabulate>=0.9
+tqdm>=4.66
+pyyaml>=6.0
+python-dotenv>=1.0
+orjson>=3.10
+
+# --- Dev / quality ---
+pytest>=8.2
+pytest-cov>=5.0
+ruff>=0.6
+mypy>=1.11
+pre-commit>=3.8
+
+# --- Optional (uncomment if used) ---
+# mlflow>=2.15               # experiment tracking (plain JSON run logs also fine)
+# dvc>=3.50                  # data versioning
+# prometheus-client>=0.20    # metrics for a cost/latency dashboard
+# ollama>=0.3                # Python client for local 8B model

@@ -1,0 +1,27 @@
+# Private planning docs: kept local, never pushed
+Docs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets
+.env
+
+# Data: raw downloads are re-fetched by scripts (hashes live in the manifest);
+# the SOP answer key stays private until results are reported
+data/raw/*
+!data/raw/.gitkeep
+data/private/*
+!data/private/.gitkeep
+
+# Local tooling
+.claude/settings.local.json
+graphify-out/
