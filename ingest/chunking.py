@@ -7,6 +7,7 @@ That keeps the fixed-vs-structure-aware ablation about boundaries alone.
 """
 
 import os
+import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -71,8 +72,37 @@ def render_document(clauses: list[Clause]) -> tuple[str, dict[str, tuple[int, in
         emitted = list(clause.section_path)
         block = _clause_block(clause)
         spans[clause.key] = (pos, pos + len(block))
+        spans |= _subparagraph_spans(clause, block, pos)
         emit(block + "\n\n")
     return "".join(parts), spans
+
+
+SUBPARAGRAPH = re.compile(r"^\((\d+)\) ", re.MULTILINE)
+
+
+def _subparagraph_spans(clause: Clause, block: str, start: int) -> dict[str, tuple[int, int]]:
+    """Spans for eCFR numbered sub-paragraphs, e.g. "21CFR11:11.3(b)(4)".
+
+    Lets a gold label point at one definition inside 11.3(b), and scores it
+    correctly whether a chunker keeps 11.3(b) whole or splits it.
+    """
+    if not clause.clause_id.endswith(")"):  # only eCFR paragraph IDs, like 11.3(b)
+        return {}
+    marks = list(SUBPARAGRAPH.finditer(block))
+    spans = {}
+    for i, m in enumerate(marks):
+        end = marks[i + 1].start() if i + 1 < len(marks) else len(block)
+        text = block[m.start() : end].rstrip("\n")
+        spans[f"{clause.key}({m.group(1)})"] = (start + m.start(), start + m.start() + len(text))
+    return spans
+
+
+def clause_keys(clauses: list[Clause]) -> set[str]:
+    """Every key a gold label may use: clauses plus eCFR sub-paragraphs."""
+    by_doc: dict[str, list[Clause]] = {}
+    for clause in clauses:
+        by_doc.setdefault(clause.doc_id, []).append(clause)
+    return {key for doc in by_doc.values() for key in render_document(doc)[1]}
 
 
 def covers(chunk: tuple[int, int], clause: tuple[int, int]) -> bool:

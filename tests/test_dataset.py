@@ -4,6 +4,7 @@ import pytest
 
 from core.settings import PROJECT_ROOT
 from eval.dataset import EvalItem, load_items, validate
+from ingest.chunking import clause_keys
 from ingest.parse import PARSED_DIR, load_corpus
 
 DEV = PROJECT_ROOT / "data" / "eval" / "dev.jsonl"
@@ -38,7 +39,7 @@ def test_validator_flags_each_rule() -> None:
 )
 def test_dev_set_is_valid_against_the_parsed_corpus() -> None:
     items = load_items(DEV)
-    assert validate(items, "dev", {c.key for c in load_corpus()}) == []
+    assert validate(items, "dev", clause_keys(load_corpus())) == []
 
 
 def test_dev_set_shape() -> None:

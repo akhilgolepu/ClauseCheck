@@ -24,7 +24,7 @@ from eval.metrics import percentile, recall_at_budget, recall_at_k, reciprocal_r
 from eval.runlog import _git, save_run
 from generation.baseline import answer
 from generation.ollama import OllamaClient
-from ingest.chunking import Chunk, fixed_size_chunks
+from ingest.chunking import Chunk, clause_keys, fixed_size_chunks
 from ingest.parse import load_corpus
 from ingest.schema import Clause
 from retrieval.bm25 import BM25Retriever
@@ -76,7 +76,7 @@ def run(config: dict[str, Any], split: str, limit: int | None, generate: bool) -
         guard_test_set(path)
     items: list[EvalItem] = load_items(path)[:limit]
     clauses = load_corpus()
-    problems = validate(items, split, {c.key for c in clauses})
+    problems = validate(items, split, clause_keys(clauses))
     if problems:
         sys.exit("Eval set is invalid:\n  " + "\n  ".join(problems))
 

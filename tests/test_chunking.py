@@ -1,4 +1,4 @@
-from ingest.chunking import covers, fixed_size_chunks, render_document
+from ingest.chunking import clause_keys, covers, fixed_size_chunks, render_document
 from ingest.schema import Clause
 
 
@@ -44,6 +44,25 @@ def test_chunk_covers_a_clause_only_with_enough_overlap() -> None:
     assert covers((0, 100), (50, 110))  # 50 of 60 chars
     assert not covers((0, 100), (90, 200))  # 10 of 110 chars
     assert covers((0, 1000), (600, 5000))  # 400 chars of a long clause
+
+
+def test_ecfr_subparagraphs_get_their_own_spans() -> None:
+    clause = Clause(
+        doc_id="CFR",
+        version="v1",
+        effective_date=None,
+        section_path=["§ 1.3 Definitions"],
+        clause_id="1.3(b)",
+        title="Definitions",
+        text="(b) Terms:\n(1) Act means the act.\n(2) Agency means FDA.",
+    )
+    text, spans = render_document([clause])
+    start, end = spans["CFR:1.3(b)(2)"]
+    assert text[start:end] == "(2) Agency means FDA."
+    start, end = spans["CFR:1.3(b)(1)"]
+    assert text[start:end] == "(1) Act means the act."
+    assert "D:1.1(1)" not in render_document(CLAUSES)[1]  # PDF clause IDs get no sub-spans
+    assert clause_keys([clause]) == {"CFR:1.3(b)", "CFR:1.3(b)(1)", "CFR:1.3(b)(2)"}
 
 
 def test_small_clause_is_covered_by_the_chunk_containing_it() -> None:

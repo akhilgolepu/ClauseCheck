@@ -17,7 +17,10 @@ DOC_MENTIONS = {
     "ICH-Q10": re.compile(r"\bQ10\b"),
 }
 CFR_REF = re.compile(r"\b(11\.\d+)((?:\([a-z0-9]+\))*)")
-PARAGRAPH_OF_SECTION = re.compile(r"paragraphs?\s+\(([a-z])\)(?:\(\w+\))*\s+of\s+this\s+section")
+# "paragraph (a)(2) of this section", "paragraphs (a)(1), (a)(2), and (a)(3) of this section"
+PARAGRAPH_OF_SECTION = re.compile(
+    r"paragraphs?\s+((?:\([a-z0-9]+\)|,|\s|and|or)+?)\s*of\s+this\s+section"
+)
 SECTION_REF = re.compile(r"\b[Ss]ections?\s+((?:[IVX]+\.)?\d+(?:\.\d+)*)")
 ANNEX_REF = re.compile(r"\bAnnex\s+([IVX]+|\d+)\b")
 
@@ -44,7 +47,8 @@ def find_cross_refs(clause: Clause, ids: set[str]) -> list[str]:
             # Clauses are first-level paragraphs, so cite 11.10(k), not 11.10(k)(2).
             candidates.append(m.group(1) + (subs[0] if subs else ""))
         for m in PARAGRAPH_OF_SECTION.finditer(text):
-            candidates.append(f"{_section_of(clause.clause_id)}({m.group(1)})")
+            for letter in re.findall(r"\(([a-z])\)", m.group(1)):
+                candidates.append(f"{_section_of(clause.clause_id)}({letter})")
     else:
         candidates += [m.group(1) for m in SECTION_REF.finditer(text)]
         candidates += [f"Annex {m.group(1)}" for m in ANNEX_REF.finditer(text)]

@@ -100,6 +100,7 @@ def test_nested_paragraphs_stay_inside_first_level_clause(
 
 def test_cross_refs(corpus: dict[str, dict[str, Clause]]) -> None:
     assert "11.10" in corpus["21CFR11"]["11.30"].cross_refs
+    assert corpus["21CFR11"]["11.50(b)"].cross_refs == ["11.50(a)"]  # "paragraphs (a)(1), ..."
     assert "ICH-Q9R1" in corpus["ICH-Q10"]["1.6.2"].cross_refs
     assert "Annex II" in corpus["ICH-Q9R1"]["6"].cross_refs
 
