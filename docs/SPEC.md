@@ -75,7 +75,11 @@ Latency here is dev-machine latency (RTX 5060, local model) and is not a target.
 
 Targets are pending sign-off; treat the +0.10 margin as a floor, not as evidence. Dev gold labels are pending source verification (`verified: false`); `python -m eval.review_sheet --split dev` writes a review sheet to data/private/review/.
 
-Known parsing limitations: the four tables in ICH Q10 section 3.2 flatten row by row into interleaved text, so no gold label depends on table content; some ICH Q9(R1) Annex II section titles absorb their first bold sub-heading.
+**Correlated items.** Some clauses are gold for several dev items: Q9(R1) 3 for d027, d034 and d035; Q9(R1) 5.1 for d015, d027 and d040; Q10 4.1 for d029 and d039. One retrieval miss can cost several items, so per-item recall is correlated and small differences between configurations need care.
+
+**Tables.** PDF tables (ICH Q10 Tables I–IV and Annex 1) are read cell by cell and rendered as `• Column header: cell text`. Before this, baseline-merging interleaved the columns into scrambled text appended to clauses 3.2.1–3.2.4, which would have polluted embeddings and reranker scores for those clauses.
+
+Known parsing limitation: some ICH Q9(R1) Annex II section titles absorb their first bold sub-heading.
 
 ## Eval hygiene and the test-set freeze rule
 

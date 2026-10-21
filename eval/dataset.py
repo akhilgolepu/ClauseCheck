@@ -19,6 +19,9 @@ class EvalItem:
     notes: str = ""
     verified: bool = False  # set True once a human has checked the gold clauses at the source
     tags: list[str] = field(default_factory=list)
+    # Unanswerable items: regexes (case-insensitive) a reviewer greps the corpus for, to
+    # confirm nothing answers the question. The review sheet prints every hit.
+    probe_terms: list[str] = field(default_factory=list)
 
 
 def load_items(path: Path) -> list[EvalItem]:
@@ -47,6 +50,8 @@ def validate(items: list[EvalItem], split: str, clause_keys: set[str]) -> list[s
             problems.append(f"{where} answerable but no gold clauses")
         if not item.answerable and item.gold_clauses:
             problems.append(f"{where} unanswerable but has gold clauses")
+        if not item.answerable and not item.probe_terms:
+            problems.append(f"{where} unanswerable needs probe_terms for the corpus grep")
         if item.type == "multi_clause" and len(item.gold_clauses) < 2:
             problems.append(f"{where} multi_clause needs at least two gold clauses")
         for key in item.gold_clauses:

@@ -18,3 +18,6 @@ def test_sheet_lists_every_item_with_gold_text_and_source() -> None:
     assert "> (5) Digital signature means" not in sheet
     assert "https://www.ecfr.gov/on/" in sheet
     assert "PDF page" in sheet
+    # unanswerable items show their corpus grep, including empty results
+    assert "- `blockchain`: no hits" in sheet
+    assert "`ICH-Q9R1:5.2`" in sheet  # d050's 'residual' near miss

@@ -31,6 +31,9 @@ def test_validator_flags_each_rule() -> None:
     assert validate([_item(gold_clauses=["D:9"])], "dev", keys)
     assert validate([_item(type="unanswerable")], "dev", keys)  # answerable flag mismatch
     assert validate([_item(type="unanswerable", answerable=False)], "dev", keys)  # has gold
+    unanswerable = dict(type="unanswerable", answerable=False, gold_clauses=[])
+    assert validate([_item(**unanswerable)], "dev", keys)  # no probe_terms
+    assert validate([_item(**unanswerable, probe_terms=["x"])], "dev", keys) == []
     assert validate([_item(type="multi_clause")], "dev", keys)  # needs two gold clauses
 
 

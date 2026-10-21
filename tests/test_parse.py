@@ -105,6 +105,18 @@ def test_cross_refs(corpus: dict[str, dict[str, Clause]]) -> None:
     assert "Annex II" in corpus["ICH-Q9R1"]["6"].cross_refs
 
 
+def test_tables_are_read_cell_by_cell(corpus: dict[str, dict[str, Clause]]) -> None:
+    text = corpus["ICH-Q10"]["3.2.2"].text
+    assert "\n• Technology Transfer: CAPA can be used as an effective system for feedback" in text
+    assert (
+        "\n• Product Discontinuation: CAPA should continue after the product is discontinued."
+        in text
+    )
+    # no interleaved column text from the old row-merged extraction
+    assert "CAPA can be used as CAPA should be used" not in text
+    assert "• Scenario: 1. Comply with GMPs" in corpus["ICH-Q10"]["Annex 1"].text
+
+
 def test_noise_is_dropped(corpus: dict[str, dict[str, Clause]]) -> None:
     texts = [c.text for doc in corpus.values() for c in doc.values()]
     assert not any("Commission Européenne" in t for t in texts)  # Annex 11 letterhead

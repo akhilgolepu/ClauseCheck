@@ -87,8 +87,27 @@ def build_sheet(items: list[EvalItem], clauses: list[Clause], split: str) -> str
                 "",
             ]
         if not item.answerable:
-            lines += ["_Unanswerable: grep the parsed text for the question's key terms._", ""]
+            lines += ["**Corpus grep** (confirm no hit answers the question):", ""]
+            for term in item.probe_terms:
+                hits = _grep(term, clauses)
+                lines.append(f"- `{term}`: {len(hits)} hit(s)" if hits else f"- `{term}`: no hits")
+                lines += [f"  - {hit}" for hit in hits[:MAX_HITS]]
+                if len(hits) > MAX_HITS:
+                    lines.append(f"  - … {len(hits) - MAX_HITS} more")
+            lines.append("")
     return "\n".join(lines)
+
+
+MAX_HITS = 15
+
+
+def _grep(pattern: str, clauses: list[Clause]) -> list[str]:
+    hits = []
+    for clause in clauses:
+        for m in re.finditer(pattern, clause.text, re.IGNORECASE):
+            context = clause.text[max(0, m.start() - 60) : m.end() + 60].replace("\n", " ")
+            hits.append(f"`{clause.key}`: …{context}…")
+    return hits
 
 
 def main() -> None:
