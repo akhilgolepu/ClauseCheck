@@ -15,7 +15,7 @@ help:
 	@echo "typecheck  mypy"
 	@echo "check      lint + typecheck + test"
 	@echo "ingest     fetch the corpus (hash-checked) and parse it into data/parsed/"
-	@echo "llm        start the local Ollama service and pull llama3.1:8b"
+	@echo "llm        pull the local answer model (needs a running ollama serve)"
 	@echo "eval       make eval CONFIG=configs/baseline.yaml SPLIT=dev|test"
 
 up:
@@ -49,8 +49,7 @@ ingest:
 	$(PY) -m ingest.parse
 
 llm:
-	docker compose --profile llm up -d ollama
-	docker compose exec ollama ollama pull llama3.1:8b
+	ollama pull qwen3:8b
 
 eval:
 	@test -n "$(CONFIG)" || (echo "usage: make eval CONFIG=configs/baseline.yaml SPLIT=dev" && exit 1)

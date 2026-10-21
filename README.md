@@ -20,7 +20,7 @@ curl http://localhost:8000/health
 
 ```bash
 make ingest   # download the 4 documents (hash-checked against data/corpus_manifest.json) and parse them
-make llm      # local Llama 3.1 8B via Ollama (needs an NVIDIA GPU in Docker)
+make llm      # pulls Qwen3 8B (Q4_K_M) into a local Ollama install (`ollama serve` must be running)
 make eval CONFIG=configs/baseline.yaml SPLIT=dev
 ```
 

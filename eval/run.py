@@ -95,6 +95,7 @@ def run(config: dict[str, Any], split: str, limit: int | None, generate: bool) -
             gen_cfg["model"],
             seed=config.get("seed", 0),
             num_ctx=gen_cfg.get("num_ctx", 4096),
+            think=gen_cfg.get("think"),
         )
         client.complete("Reply with OK.", "OK?")  # untimed warm-up: loads the model
 

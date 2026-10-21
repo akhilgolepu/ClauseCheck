@@ -15,8 +15,9 @@ retrieval:
 generation:
   enabled: true
   provider: ollama
-  model: llama3.1:8b    # Q4_K_M, local on RTX 5060
-  num_ctx: 4096
+  model: qwen3:8b       # Q4_K_M, local on RTX 5060
+  think: false          # plain answer: no reasoning phase in the naive baseline
+  num_ctx: 4096         # ~2.6K-token prompts; small context keeps the model fully on the GPU
   context_k: 5          # passages given to the model
   usd_per_mtok_in: 0.0  # local model: no API cost
   usd_per_mtok_out: 0.0

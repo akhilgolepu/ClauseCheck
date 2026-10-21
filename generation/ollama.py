@@ -23,10 +23,12 @@ class OllamaClient:
         temperature: float = 0.0,
         seed: int = 0,
         num_ctx: int = 8192,
+        think: bool | None = None,
         timeout_s: float = 300.0,
     ) -> None:
         self.model = model
         self.options = {"temperature": temperature, "seed": seed, "num_ctx": num_ctx}
+        self.think = think  # reasoning models (Qwen3): False skips the thinking phase
         self.http = httpx.Client(base_url=base_url, timeout=timeout_s)
 
     def complete(self, system: str, prompt: str) -> Completion:
@@ -41,6 +43,7 @@ class OllamaClient:
                 ],
                 "stream": False,
                 "options": self.options,
+                **({"think": self.think} if self.think is not None else {}),
             },
         ).raise_for_status()
         body = response.json()
