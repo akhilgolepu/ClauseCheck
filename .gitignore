@@ -19,6 +19,9 @@ htmlcov/
 # the SOP answer key stays private until results are reported
 data/raw/*
 !data/raw/.gitkeep
+# parsed text is the same documents' text, so it's regenerated (`make ingest`), not committed
+data/parsed/*
+!data/parsed/.gitkeep
 data/private/*
 !data/private/.gitkeep
 

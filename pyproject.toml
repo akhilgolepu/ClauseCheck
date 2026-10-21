@@ -12,6 +12,9 @@ extend-exclude = ["Docs"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/test_parse.py" = ["E501"]  # spot-check table: one source-verified row per line
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

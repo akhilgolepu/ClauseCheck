@@ -3,7 +3,7 @@ PY ?= python
 CONFIG ?=
 SPLIT ?= dev
 
-.PHONY: help up down logs test lint format typecheck check ingest eval
+.PHONY: help up down logs test lint format typecheck check ingest llm eval
 
 help:
 	@echo "up         start Postgres+pgvector and the API (docker compose)"
@@ -14,8 +14,9 @@ help:
 	@echo "format     apply ruff fixes and formatting"
 	@echo "typecheck  mypy"
 	@echo "check      lint + typecheck + test"
-	@echo "ingest     parse and load the corpus (Phase 1)"
-	@echo "eval       make eval CONFIG=... SPLIT=dev|test (Phase 1)"
+	@echo "ingest     fetch the corpus (hash-checked) and parse it into data/parsed/"
+	@echo "llm        start the local Ollama service and pull llama3.1:8b"
+	@echo "eval       make eval CONFIG=configs/baseline.yaml SPLIT=dev|test"
 
 up:
 	docker compose up --build -d
@@ -44,7 +45,13 @@ typecheck:
 check: lint typecheck test
 
 ingest:
-	@echo "make ingest: not implemented yet (Phase 1)" && exit 1
+	$(PY) -m ingest.fetch
+	$(PY) -m ingest.parse
+
+llm:
+	docker compose --profile llm up -d ollama
+	docker compose exec ollama ollama pull llama3.1:8b
 
 eval:
-	@echo "make eval: not implemented yet (Phase 1)" && exit 1
+	@test -n "$(CONFIG)" || (echo "usage: make eval CONFIG=configs/baseline.yaml SPLIT=dev" && exit 1)
+	$(PY) -m eval.run --config $(CONFIG) --split $(SPLIT)

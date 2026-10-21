@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://clausecheck:clausecheck@localhost:5432/clausecheck"
     corpus_manifest_path: Path = PROJECT_ROOT / "data" / "corpus_manifest.json"
     eval_runs_dir: Path = PROJECT_ROOT / "eval" / "runs"
+    ollama_url: str = "http://localhost:11434"
 
 
 @lru_cache

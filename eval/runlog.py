@@ -5,7 +5,6 @@ the git commit it ran on, and the corpus version, so any number in the report
 can be traced back to the exact code and data that produced it.
 """
 
-import hashlib
 import json
 import subprocess
 from collections.abc import Mapping
@@ -27,10 +26,11 @@ def _git(*args: str) -> str | None:
 
 
 def corpus_version(manifest_path: Path) -> str | None:
-    """Short SHA-256 of the corpus manifest, or None before the corpus exists."""
+    """The manifest's content-based corpus_version, or None before the corpus exists."""
     if not manifest_path.is_file():
         return None
-    return hashlib.sha256(manifest_path.read_bytes()).hexdigest()[:12]
+    version: str | None = json.loads(manifest_path.read_text()).get("corpus_version")
+    return version
 
 
 def save_run(
@@ -38,6 +38,7 @@ def save_run(
     metrics: Mapping[str, Any],
     ops: Mapping[str, Any] | None = None,
     *,
+    details: list[dict[str, Any]] | None = None,
     runs_dir: Path | None = None,
     manifest_path: Path | None = None,
 ) -> Path:
@@ -55,6 +56,7 @@ def save_run(
         "config": dict(config),
         "metrics": dict(metrics),
         "ops": dict(ops or {}),
+        "details": details or [],  # per-question results, for failure analysis
     }
 
     runs_dir.mkdir(parents=True, exist_ok=True)

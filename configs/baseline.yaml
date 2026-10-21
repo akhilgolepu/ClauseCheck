@@ -1,0 +1,22 @@
+# Phase 1 naive baseline: fixed 500-token chunks, BM25 only, plain LLM answer
+# (no citation check, no abstention). Every later configuration is compared to this.
+name: baseline-fixed500-bm25
+seed: 0
+
+chunking:
+  strategy: fixed
+  max_tokens: 500       # cl100k_base tokens
+  overlap_tokens: 0
+
+retrieval:
+  method: bm25
+  top_k: 10
+
+generation:
+  enabled: true
+  provider: ollama
+  model: llama3.1:8b    # Q4_K_M, local on RTX 5060
+  num_ctx: 4096
+  context_k: 5          # passages given to the model
+  usd_per_mtok_in: 0.0  # local model: no API cost
+  usd_per_mtok_out: 0.0

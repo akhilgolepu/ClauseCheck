@@ -4,7 +4,7 @@ A grounded assistant for regulated quality documents (FDA 21 CFR Part 11, EU GMP
 
 > **Research prototype. Not legal, regulatory, or compliance advice.** Verify every output against the source documents.
 
-**Status:** Phase 0 (scaffold). Results will lead this README once the frozen test set has been run. See [docs/SPEC.md](docs/SPEC.md) for the spec.
+**Status:** Phase 1 (corpus, baseline). Results will lead this README once the frozen test set has been run. See [docs/SPEC.md](docs/SPEC.md) for the spec and the baseline numbers.
 
 ## Quickstart
 
@@ -15,6 +15,16 @@ docker compose up --build -d
 curl http://localhost:8000/health
 # {"status":"ok","database":"ok"}
 ```
+
+## Reproduce the baseline
+
+```bash
+make ingest   # download the 4 documents (hash-checked against data/corpus_manifest.json) and parse them
+make llm      # local Llama 3.1 8B via Ollama (needs an NVIDIA GPU in Docker)
+make eval CONFIG=configs/baseline.yaml SPLIT=dev
+```
+
+Raw documents and parsed text are not committed (licensing); `make ingest` rebuilds them from the recorded sources and refuses files whose hash differs from the manifest.
 
 ## Development
 
@@ -42,5 +52,6 @@ make check   # ruff + mypy + pytest
 | `api/` | FastAPI service |
 | `core/` | Shared settings |
 | `web/` | Front end |
-| `data/` | `raw/` (downloaded, not committed), `parsed/`, `sops/`, `eval/`, `private/` (not committed) |
+| `data/` | `raw/` and `parsed/` (rebuilt by `make ingest`, not committed), `sops/`, `eval/`, `private/` (not committed), `corpus_manifest.json` |
+| `configs/` | Eval run configurations |
 | `docs/` | Spec and report |

@@ -1,4 +1,3 @@
-import hashlib
 import json
 from pathlib import Path
 
@@ -7,7 +6,7 @@ from eval.runlog import save_run
 
 def test_save_run_writes_config_metrics_ops_and_provenance(tmp_path: Path) -> None:
     manifest = tmp_path / "corpus_manifest.json"
-    manifest.write_text('{"documents": []}')
+    manifest.write_text('{"corpus_version": "abc123def456", "documents": []}')
 
     path = save_run(
         config={"retrieval": "bm25", "chunking": "fixed"},
@@ -22,8 +21,7 @@ def test_save_run_writes_config_metrics_ops_and_provenance(tmp_path: Path) -> No
     assert record["config"] == {"retrieval": "bm25", "chunking": "fixed"}
     assert record["metrics"] == {"recall@5": 0.42}
     assert record["ops"]["tokens_in"] == 900
-    expected = hashlib.sha256(manifest.read_bytes()).hexdigest()[:12]
-    assert record["corpus_version"] == expected
+    assert record["corpus_version"] == "abc123def456"
     assert "git_commit" in record
     assert "git_dirty" in record
     assert record["timestamp"].endswith("Z")

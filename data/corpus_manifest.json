@@ -1,0 +1,49 @@
+{
+  "corpus_version": "3db2fa23e6ad",
+  "documents": [
+    {
+      "doc_id": "21CFR11",
+      "title": "21 CFR Part 11: Electronic Records; Electronic Signatures",
+      "format": "xml",
+      "source_url": "https://www.ecfr.gov/api/versioner/v1/full/2026-10-14/title-21.xml?part=11",
+      "version": "2026-10-14",
+      "effective_date": "1997-08-20",
+      "download_date": "2026-10-21",
+      "sha256": "7fff122daf0a667920b359ce857373b6cf503e36c5b6d96b5537bac925ae9197",
+      "file": "data/raw/21CFR11.xml"
+    },
+    {
+      "doc_id": "EUGMP-A11",
+      "title": "EudraLex Volume 4, Annex 11: Computerised Systems",
+      "format": "pdf",
+      "source_url": "https://health.ec.europa.eu/document/download/8d305550-dd22-4dad-8463-2ddb4a1345f1_en?filename=annex11_01-2011_en.pdf",
+      "version": "Revision January 2011",
+      "effective_date": "2011-06-30",
+      "download_date": "2026-10-21",
+      "sha256": "8ec11211ba33bf88ad4e71acc6bf60fd0e7823cfa495b116872e2c287e4aebbb",
+      "file": "data/raw/EUGMP-A11.pdf"
+    },
+    {
+      "doc_id": "ICH-Q9R1",
+      "title": "ICH Q9(R1): Quality Risk Management",
+      "format": "pdf",
+      "source_url": "https://database.ich.org/sites/default/files/ICH_Q9%28R1%29_Guideline_Step4_2023_0126_0.pdf",
+      "version": "Step 4, 18 January 2023",
+      "effective_date": null,
+      "download_date": "2026-10-21",
+      "sha256": "007a97272eec44c763d8e7c586212df8a7ad91a5ed403899ec90d66cfce057cc",
+      "file": "data/raw/ICH-Q9R1.pdf"
+    },
+    {
+      "doc_id": "ICH-Q10",
+      "title": "ICH Q10: Pharmaceutical Quality System",
+      "format": "pdf",
+      "source_url": "https://database.ich.org/sites/default/files/Q10%20Guideline.pdf",
+      "version": "Step 4, 4 June 2008",
+      "effective_date": null,
+      "download_date": "2026-10-21",
+      "sha256": "396b99197692a2fd386089b886dc7345e22b726fd6ebd0bbb5d2a0173b0ec292",
+      "file": "data/raw/ICH-Q10.pdf"
+    }
+  ]
+}
