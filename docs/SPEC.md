@@ -29,8 +29,9 @@ Plus 10-12 synthetic SOPs with seeded gaps, scored against a private answer key 
 
 | Area | Metric | Definition |
 | --- | --- | --- |
-| Retrieval | recall@k (k = 1, 3, 5, 10) | Fraction of a question's gold clauses that appear in the top k passages, averaged over answerable questions |
-| Retrieval | MRR | Mean of 1 / rank of the first gold clause (0 if none in the top 10) |
+| Retrieval | recall@k (k = 1, 3, 5, 10) | Fraction of a question's gold clauses covered by the top k passages, averaged over answerable questions |
+| Retrieval | recall@B tokens (B = 500, 1000, 2500) | Same, over the top passages that fit in B tokens of retrieved text. **The metric for comparing chunking strategies**: recall@k rewards bigger chunks |
+| Retrieval | MRR | Mean of 1 / rank of the first passage covering a gold clause (0 if none in the top 10) |
 | Faithfulness | Faithful-answer rate | % of non-abstained answers where every claim is supported by a cited, retrieved passage. LLM judge, validated against ~40 hand labels; Cohen's kappa reported |
 | Citation integrity | Out-of-set citation rate | % of citations whose clause ID is not in the retrieved set. Target: 0 |
 | Abstention | Correct refusal rate | Abstentions / unanswerable questions |
@@ -38,7 +39,29 @@ Plus 10-12 synthetic SOPs with seeded gaps, scored against a private answer key 
 | Gap detection | Precision, recall, F1 | Per status (met / partial / missing) against the seeded answer key, plus confusion matrix |
 | Operations | Latency, cost | p50 / p95 latency (total and per stage); tokens and USD per query |
 
-Numeric targets are set after the Phase 1 baseline (fixed 500-token chunks, BM25 only, no citation check).
+**Clauses and coverage.** A clause is the smallest numbered unit a citation points to: a first-level paragraph in Part 11 (`11.10(e)`, with its `(1)`/`(i)` sub-paragraphs inside), a numbered section in the PDFs (`4.3`, `I.8`), or one glossary term (`7:Harm`). Gold labels are corpus-wide keys such as `21CFR11:11.10(e)`. Every chunking strategy chunks the same rendered text, where each clause has a known character span; a passage covers a clause when it holds at least half of the clause, or 300 characters of a long one.
+
+## Phase 1 baseline (dev set, 50 items)
+
+Fixed 500-token chunks, BM25, Llama 3.1 8B (local, Q4) answering from the top 5 passages with no citation check. Run: `eval/runs/20261021T093759Z.json` (commit 80ce17d, clean tree).
+
+| recall@1 | recall@5 | recall@10 | recall@500tok | recall@1000tok | recall@2500tok | MRR | p50 / p95 latency |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 0.69 | 0.90 | 0.96 | 0.69 | 0.75 | 0.90 | 0.89 | 3.3 s / 5.0 s |
+
+Caveats: the corpus is 46 chunks, so the top 5 is 11% of it; and the dev questions were drafted from clause text, so they share its wording, which favours BM25. Unanswerable handling isn't scored until Phase 3, but the baseline already shows the target failure modes: it answers from "general knowledge" when the passages are silent (d047, d049, d050) and accepts false premises with a wrong citation (d041, "Which Part 11 clause requires blockchain-based audit trails?", concludes "§ 11.10(c)", quoting text that is actually in 11.10(e)).
+
+**Proposed targets** (pending sign-off):
+
+| Metric | Baseline | Target |
+| --- | --- | --- |
+| recall@1000tok (Phase 2 exit) | 0.75 | ≥ 0.85 |
+| MRR | 0.89 | ≥ 0.90, no regression |
+| Out-of-set citations | n/a | 0 |
+| Wrongful answers on unanswerable | not scored | ≤ 10% |
+| Wrongful refusals on answerable | n/a | ≤ 10% |
+
+Known parsing limitations: the four tables in ICH Q10 section 3.2 flatten row by row into interleaved text, so no gold label depends on table content; some ICH Q9(R1) Annex II section titles absorb their first bold sub-heading.
 
 ## Eval hygiene and the test-set freeze rule
 
