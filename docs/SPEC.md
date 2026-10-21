@@ -47,11 +47,14 @@ Fixed 500-token chunks, BM25, and a local 8B model answering from the top 5 pass
 
 | Dev set, model | recall@1 | recall@5 | recall@10 | recall@500tok | recall@1000tok | recall@2500tok | MRR | p50 / p95 latency (dev PC) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Revised, Qwen3 8B (current)** | 0.51 | 0.78 | 0.90 | 0.51 | **0.61** | 0.78 | 0.74 | 2.5 s / 5.2 s |
+| **Reviewed, Qwen3 8B (current)** | 0.45 | 0.73 | 0.85 | 0.45 | **0.575** | 0.73 | 0.68 | 2.8 s / 5.3 s |
+| Revised, Qwen3 8B | 0.51 | 0.78 | 0.90 | 0.51 | 0.61 | 0.78 | 0.74 | 2.5 s / 5.2 s |
 | Revised, Llama 3.1 8B | 0.51 | 0.78 | 0.90 | 0.51 | 0.61 | 0.78 | 0.74 | 5.1 s / 8.3 s |
 | First draft, Llama 3.1 8B (superseded) | 0.69 | 0.90 | 0.96 | 0.69 | 0.75 | 0.90 | 0.89 | 3.3 s / 5.0 s |
 
-Runs: current `eval/runs/20261021T111123Z.json` (commit 68b2528, clean tree); revised with Llama `eval/runs/20261021T101544Z.json` (commit 62b331c); first draft `eval/runs/20261021T093759Z.json`, recorded as commit 80ce17d, which history rewriting renamed to 513829c (identical tree).
+Runs: current `eval/runs/20261021T120706Z.json` (commit 78a9d04, clean tree); revised with Qwen3 `eval/runs/20261021T111123Z.json` (commit 68b2528); revised with Llama `eval/runs/20261021T101544Z.json` (commit 62b331c); first draft `eval/runs/20261021T093759Z.json`, recorded as commit 80ce17d, which history rewriting renamed to 513829c (identical tree).
+
+The reviewed set fixes reference answers, adds 11.2(a) to d033's gold, rewords d011, d016 and d018, and reads Q10's tables cell by cell. Per item: d011 and d016 fall from 1.0 to 0.0 recall@1000tok once they stop echoing their clause (neither is in the BM25 top 10 any more); d029 rises from 0.5 to 1.0 because Q10 3.2.4 no longer carries scrambled table text; d030's first hit moves from rank 1 to 2 as chunk boundaries shift. No other item changed.
 
 The first draft's questions copied clause wording and named the target section in cross-reference questions, which BM25 matched directly; the revision rewrote those in practitioner language and hid the links, which cost 14 points of recall@1000tok. Recall@k by type on the revised set: lookup 0.72, multi-clause 0.88, cross-reference 0.75. The corpus is still small (46 chunks, so the top 5 is 11% of it).
 
@@ -67,8 +70,8 @@ Latency here is dev-machine latency (RTX 5060, local model) and is not a target.
 
 | Metric | Baseline | Target |
 | --- | --- | --- |
-| recall@1000tok (Phase 2 exit) | 0.61 | baseline + 0.10 (≥ 0.71) |
-| MRR | 0.74 | no regression |
+| recall@1000tok (Phase 2 exit) | 0.575 | baseline + 0.10 (≥ 0.675) |
+| MRR | 0.68 | no regression |
 | Out-of-set citations | n/a | 0 |
 | Wrongful answers on unanswerable | not scored | set after the Phase 3 baseline |
 | Wrongful refusals on answerable | n/a | set after the Phase 3 baseline |
