@@ -45,7 +45,7 @@ Plus 10-12 synthetic SOPs with seeded gaps, scored against a private answer key 
 
 Fixed 500-token chunks, BM25, and a local 8B model answering from the top 5 passages with no citation check. The answer model is Qwen3 8B (Q4_K_M, thinking off) via native Ollama; the earlier rows used Llama 3.1 8B (Q4). Retrieval metrics don't depend on the model.
 
-| Dev set, model | recall@1 | recall@5 | recall@10 | recall@500tok | recall@1000tok | recall@2500tok | MRR | p50 / p95 latency |
+| Dev set, model | recall@1 | recall@5 | recall@10 | recall@500tok | recall@1000tok | recall@2500tok | MRR | p50 / p95 latency (dev PC) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | **Revised, Qwen3 8B (current)** | 0.51 | 0.78 | 0.90 | 0.51 | **0.61** | 0.78 | 0.74 | 2.5 s / 5.2 s |
 | Revised, Llama 3.1 8B | 0.51 | 0.78 | 0.90 | 0.51 | 0.61 | 0.78 | 0.74 | 5.1 s / 8.3 s |
@@ -56,6 +56,10 @@ Runs: current `eval/runs/20261021T111123Z.json` (commit 68b2528, clean tree); re
 The first draft's questions copied clause wording and named the target section in cross-reference questions, which BM25 matched directly; the revision rewrote those in practitioner language and hid the links, which cost 14 points of recall@1000tok. Recall@k by type on the revised set: lookup 0.72, multi-clause 0.88, cross-reference 0.75. The corpus is still small (46 chunks, so the top 5 is 11% of it).
 
 Unanswerable handling isn't scored until Phase 3, but the answers already show the target failure modes. Llama 3.1 8B answered from "general knowledge" when the passages were silent, and accepted a false premise with a wrong citation (d041, "Which Part 11 clause requires blockchain-based audit trails?", concluded "§ 11.10(c)", quoting text that is actually in 11.10(e)). Qwen3 8B declines 9 of the 10 unanswerables ("the passages do not specify…") but invents a definition on d050 ("ICH Q9(R1) defines residual risk as…"; it doesn't). d041 is the brief's own example, so it is tagged `regression` and is not counted as independent evidence.
+
+Qwen3's 9 of 10 is not a result: the baseline has no abstention mechanism, so it shows either that the unanswerables are easier than intended or that Qwen3 is more cautious. The number that matters comes in Phase 3, wrongful refusals on answerable questions once abstention is on. Both models' runs are kept: identical retrieval with very different answer behaviour is itself a finding for the report.
+
+Latency here is dev-machine latency (RTX 5060, local model) and is not a target. NFR-2 measures latency on the deployment configuration (CPU-only VM plus an LLM API), so latency targets are set when that is measured in Phase 5.
 
 **Unanswerable means** the corpus has no statement that answers the specific question; the correct output is an abstention, optionally naming the nearest clause. All ten are in-corpus near misses (a missing number, threshold, interval or definition next to a real clause), each grep-checked against the parsed text.
 
@@ -69,7 +73,7 @@ Unanswerable handling isn't scored until Phase 3, but the answers already show t
 | Wrongful answers on unanswerable | not scored | set after the Phase 3 baseline |
 | Wrongful refusals on answerable | n/a | set after the Phase 3 baseline |
 
-Targets are pending sign-off, and dev gold labels are pending source verification (`verified: false`).
+Targets are pending sign-off; treat the +0.10 margin as a floor, not as evidence. Dev gold labels are pending source verification (`verified: false`); `python -m eval.review_sheet --split dev` writes a review sheet to data/private/review/.
 
 Known parsing limitations: the four tables in ICH Q10 section 3.2 flatten row by row into interleaved text, so no gold label depends on table content; some ICH Q9(R1) Annex II section titles absorb their first bold sub-heading.
 
