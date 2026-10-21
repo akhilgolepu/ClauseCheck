@@ -39,27 +39,36 @@ Plus 10-12 synthetic SOPs with seeded gaps, scored against a private answer key 
 | Gap detection | Precision, recall, F1 | Per status (met / partial / missing) against the seeded answer key, plus confusion matrix |
 | Operations | Latency, cost | p50 / p95 latency (total and per stage); tokens and USD per query |
 
-**Clauses and coverage.** A clause is the smallest numbered unit a citation points to: a first-level paragraph in Part 11 (`11.10(e)`, with its `(1)`/`(i)` sub-paragraphs inside), a numbered section in the PDFs (`4.3`, `I.8`), or one glossary term (`7:Harm`). Gold labels are corpus-wide keys such as `21CFR11:11.10(e)`. Every chunking strategy chunks the same rendered text, where each clause has a known character span; a passage covers a clause when it holds at least half of the clause, or 300 characters of a long one.
+**Clauses and coverage.** A clause is the smallest numbered unit a citation points to: a first-level paragraph in Part 11 (`11.10(e)`, with its `(1)`/`(i)` sub-paragraphs inside), a numbered section in the PDFs (`4.3`, `I.8`), or one glossary term (`7:Harm`). Gold labels are corpus-wide keys such as `21CFR11:11.10(e)`; a Part 11 numbered sub-paragraph can also be a gold key (`21CFR11:11.3(b)(4)`) and has its own span, so it is scored fairly whether a chunker keeps the parent paragraph whole or splits it. Every chunking strategy chunks the same rendered text, where each clause has a known character span; a passage covers a clause when it holds at least half of the clause, or 300 characters of a long one.
 
 ## Phase 1 baseline (dev set, 50 items)
 
-Fixed 500-token chunks, BM25, Llama 3.1 8B (local, Q4) answering from the top 5 passages with no citation check. Run: `eval/runs/20261021T093759Z.json` (commit 80ce17d, clean tree).
+Fixed 500-token chunks, BM25, Llama 3.1 8B (local, Q4) answering from the top 5 passages with no citation check.
 
-| recall@1 | recall@5 | recall@10 | recall@500tok | recall@1000tok | recall@2500tok | MRR | p50 / p95 latency |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 0.69 | 0.90 | 0.96 | 0.69 | 0.75 | 0.90 | 0.89 | 3.3 s / 5.0 s |
+| Dev set version | recall@1 | recall@5 | recall@10 | recall@500tok | recall@1000tok | recall@2500tok | MRR | p50 / p95 latency |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Revised (current)** | 0.51 | 0.78 | 0.90 | 0.51 | **0.61** | 0.78 | 0.74 | 5.1 s / 8.3 s |
+| First draft (superseded) | 0.69 | 0.90 | 0.96 | 0.69 | 0.75 | 0.90 | 0.89 | 3.3 s / 5.0 s |
 
-Caveats: the corpus is 46 chunks, so the top 5 is 11% of it; and the dev questions were drafted from clause text, so they share its wording, which favours BM25. Unanswerable handling isn't scored until Phase 3, but the baseline already shows the target failure modes: it answers from "general knowledge" when the passages are silent (d047, d049, d050) and accepts false premises with a wrong citation (d041, "Which Part 11 clause requires blockchain-based audit trails?", concludes "§ 11.10(c)", quoting text that is actually in 11.10(e)).
+Runs: current `eval/runs/20261021T101544Z.json` (commit 62b331c, clean tree); first draft `eval/runs/20261021T093759Z.json`, recorded as commit 80ce17d, which history rewriting renamed to 513829c (identical tree).
 
-**Proposed targets** (pending sign-off):
+The first draft's questions copied clause wording and named the target section in cross-reference questions, which BM25 matched directly; the revision rewrote those in practitioner language and hid the links, which cost 14 points of recall@1000tok. Recall@k by type on the revised set: lookup 0.72, multi-clause 0.88, cross-reference 0.75. The corpus is still small (46 chunks, so the top 5 is 11% of it).
+
+Unanswerable handling isn't scored until Phase 3, but the baseline already shows the target failure modes: it answers from "general knowledge" when the passages are silent, and accepts false premises with a wrong citation (d041, "Which Part 11 clause requires blockchain-based audit trails?", concludes "§ 11.10(c)", quoting text that is actually in 11.10(e)). d041 is the brief's own example, so it is tagged `regression` and is not counted as independent evidence.
+
+**Unanswerable means** the corpus has no statement that answers the specific question; the correct output is an abstention, optionally naming the nearest clause. All ten are in-corpus near misses (a missing number, threshold, interval or definition next to a real clause), each grep-checked against the parsed text.
+
+**Targets** are margins over the re-run baseline, so they survive the baseline moving. With 40 answerable dev questions, one question moves a recall mean by up to 0.025, so +0.10 is about four questions.
 
 | Metric | Baseline | Target |
 | --- | --- | --- |
-| recall@1000tok (Phase 2 exit) | 0.75 | ≥ 0.85 |
-| MRR | 0.89 | ≥ 0.90, no regression |
+| recall@1000tok (Phase 2 exit) | 0.61 | baseline + 0.10 (≥ 0.71) |
+| MRR | 0.74 | no regression |
 | Out-of-set citations | n/a | 0 |
-| Wrongful answers on unanswerable | not scored | ≤ 10% |
-| Wrongful refusals on answerable | n/a | ≤ 10% |
+| Wrongful answers on unanswerable | not scored | set after the Phase 3 baseline |
+| Wrongful refusals on answerable | n/a | set after the Phase 3 baseline |
+
+Targets are pending sign-off, and dev gold labels are pending source verification (`verified: false`).
 
 Known parsing limitations: the four tables in ICH Q10 section 3.2 flatten row by row into interleaved text, so no gold label depends on table content; some ICH Q9(R1) Annex II section titles absorb their first bold sub-heading.
 
