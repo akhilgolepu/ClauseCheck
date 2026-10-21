@@ -23,10 +23,12 @@ OUT_DIR = PROJECT_ROOT / "data" / "private" / "review"
 
 CHECKLIST = """\
 For each item, against the source (not this sheet's text):
-1. The gold clause(s) contain the answer; for multi-clause and cross-reference items, every gold clause is needed.
+1. The gold clause(s) contain the answer; for multi-clause and cross-reference
+   items, every gold clause is needed.
 2. No other clause is needed, and no better clause exists.
 3. The reference answer says only what the gold text supports.
-4. Unanswerable: nothing in the corpus answers the specific question (the near miss is only adjacent).
+4. Unanswerable: nothing in the corpus answers the specific question (the near
+   miss is only adjacent).
 
 Then set `"verified": true` for that item in data/eval/{split}.jsonl.
 """
