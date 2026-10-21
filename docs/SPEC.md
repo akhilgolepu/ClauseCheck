@@ -76,6 +76,8 @@ Latency here is dev-machine latency (RTX 5060, local model) and is not a target.
 | Wrongful answers on unanswerable | not scored | set after the Phase 3 baseline |
 | Wrongful refusals on answerable | n/a | set after the Phase 3 baseline |
 
+Fallback: if recall@1000tok misses 0.675, debug chunking first, before changing retrieval or the reranker.
+
 Targets are pending sign-off; treat the +0.10 margin as a floor, not as evidence. Dev gold labels are pending source verification (`verified: false`); `python -m eval.review_sheet --split dev` writes a review sheet to data/private/review/.
 
 **Correlated items.** Some clauses are gold for several dev items: Q9(R1) 3 for d027, d034 and d035; Q9(R1) 5.1 for d015, d027 and d040; Q10 4.1 for d029 and d039. One retrieval miss can cost several items, so per-item recall is correlated and small differences between configurations need care.
